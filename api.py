@@ -3,8 +3,11 @@ import joblib
 import pandas as pd
 import numpy as np
 from typing import Dict, Any, Union
+import os
 
 app = Flask(__name__)
+
+model_path = os.path.join('models', 'model_1.pkl')
 
 @app.route('/v1/predict/<Longitude>/<Latitude>', methods=["GET", "POST"])
 def realtime(Longitude: float, Latitude: float) -> Dict[str, Any]:
@@ -13,7 +16,7 @@ def realtime(Longitude: float, Latitude: float) -> Dict[str, Any]:
     """
     # load saved pipeline object
     try:
-        pipeline = joblib.load('models/model_1.pkl')
+        pipeline = joblib.load(model_path)
     except FileNotFoundError:
         return jsonify({'Error': 'Saved pipeline not found.'}), 404
     except Exception as e:
@@ -31,17 +34,16 @@ def realtime(Longitude: float, Latitude: float) -> Dict[str, Any]:
 
 def recommended_hospitals(pipeline: Dict[str, object], input_data: pd.DataFrame) -> Dict[str, Union[str, float]]:
     """
-    Predict the class and its probability for each model in the given pipeline
+    Predict the class and its probability for the given input data using the pipeline
     """
     # predict
     results = {}
-    for model_name, model in pipeline.items():
-        if not model_name.startswith('model_'):
-            continue
-        prediction = model.predict(input_data)
-        probas = np.max(model.predict_proba(input_data)[0]) * 100
-        encoder = pipeline['label_encoder']
-        results[f"{type(model).__name__}'s Prediction"] = f'{probas:.2f}% is {encoder.inverse_transform([prediction])[0]}'
+    kmeans_model = pipeline  # Assuming the KMeans model is stored directly in the pipeline
+    prediction = kmeans_model.predict(input_data)
+    cluster_centers = kmeans_model.cluster_centers_
+    
+    # Add your logic here to process the prediction and cluster_centers
+    
     return results
 
 if __name__ == '__main__':
