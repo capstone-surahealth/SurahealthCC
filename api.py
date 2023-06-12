@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from typing import Dict, Any, Union
 import os
+from sklearn.cluster import KMeans
 
 app = Flask(__name__)
 
@@ -32,17 +33,27 @@ def realtime(Longitude: float, Latitude: float) -> Dict[str, Any]:
 
     return jsonify(raw_data=input_dict, result=result_dict)
 
-def recommended_hospitals(pipeline: Dict[str, object], input_data: pd.DataFrame) -> Dict[str, Union[str, float]]:
+def recommended_hospitals(pipeline: Any, input_data: pd.DataFrame) -> Dict[str, Union[str, float]]:
     """
     Predict the class and its probability for the given input data using the pipeline
     """
     # predict
     results = {}
-    kmeans_model = pipeline  # Assuming the KMeans model is stored directly in the pipeline
-    prediction = kmeans_model.predict(input_data)
-    cluster_centers = kmeans_model.cluster_centers_
-    
-    # Add your logic here to process the prediction and cluster_centers
+    if isinstance(pipeline, KMeans):
+        model = pipeline
+        prediction = model.predict(input_data)
+        cluster_centers = model.cluster_centers_
+        # Add your logic here to process the prediction and cluster_centers
+        results['Prediction'] = prediction.tolist()
+        results['Cluster Centers'] = cluster_centers.tolist()
+    else:
+        for model_name, model in pipeline.items():
+            if not model_name.startswith('model_'):
+                continue
+            prediction = model.predict(input_data)
+            probas = np.max(model.predict_proba(input_data)[0]) * 100
+            encoder = pipeline['label_encoder']
+            results[f"{type(model).__name__}'s Prediction"] = f'{probas:.2f}% is {encoder.inverse_transform([prediction])[0]}'
     
     return results
 
