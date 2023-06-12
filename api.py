@@ -24,6 +24,8 @@ print(joblib.__version__)
 print(requests.__version__)
 print(pd.__version__)
 print(np.__version__)
+print(sklearn.__version__)
+print(tf.__version__)
 
 app = Flask(__name__)
 
