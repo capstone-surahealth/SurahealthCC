@@ -27,6 +27,9 @@ print(np.__version__)
 
 app = Flask(__name__)
 
+@app.route('/', methods=["GET"])
+def hello():
+    return "Hello, this is Surahealth API. To access the prediction, please enter your longitude and latitude on /v1/predict/your_longitude/your_latitude"
 
 @app.route('/v1/predict/<Longitude>/<Latitude>', methods=["GET"])
 def recommended_hospitals(Longitude, Latitude):
@@ -34,9 +37,9 @@ def recommended_hospitals(Longitude, Latitude):
   Predict the class and recommended_hospitals
   """
   #load dataset
-  model = pickle.load(open('models/model_2.pkl', 'rb')) 
-  scaler = pickle.load(open('models/sc_2.pkl', 'rb'))
-  data = pickle.load(open('models/filename_drop.pkl', 'rb'))
+  model = pickle.load(open('models/model_3.pkl', 'rb')) 
+  scaler = pickle.load(open('models/sc_3.pkl', 'rb'))
+  data = pickle.load(open('models/filename_3.pkl', 'rb'))
   print(data.head())
   #mengubah inputan mejadi dataframe
   df_input = pd.DataFrame({"Longitude": [Longitude], "Latitude": [Latitude]})
@@ -50,7 +53,7 @@ def recommended_hospitals(Longitude, Latitude):
   print(Cluster)
 
   #Menghitung jarak user dengan rumah sakit
-  data_cluster['Hospital Distance'] = data_cluster.apply(lambda x: euclidean_distances([[x.Longitude, x.Latitude]], [[Longitude, Latitude]])*1000, axis = 1)
+  data_cluster['Hospital Distance'] = data_cluster.apply(lambda x: euclidean_distances([[x.Longitude, x.Latitude]], data_scaled.values), axis = 1)
 
   #Mengurutkan hasil rekomendasi
   col = ['Longitude', 'Latitude', 'Tipe', 'BPJS']
