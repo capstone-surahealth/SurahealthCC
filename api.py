@@ -16,7 +16,7 @@ import numpy as np
 import pickle
 import sklearn
 import tensorflow as tf
-from sklearn.metrics.pairwise import euclidean_distances
+from sklearn.metrics.pairwise import haversine_distances
 warnings.filterwarnings('ignore')
 
 print(flask.__version__)
@@ -39,9 +39,9 @@ def recommended_hospitals(Longitude, Latitude):
   Predict the class and recommended_hospitals
   """
   #load dataset
-  model = pickle.load(open('models/model_3.pkl', 'rb')) 
-  scaler = pickle.load(open('models/sc_3.pkl', 'rb'))
-  data = pickle.load(open('models/filename_3.pkl', 'rb'))
+  model = pickle.load(open('models/model_4.pkl', 'rb')) 
+  scaler = pickle.load(open('models/sc_4.pkl', 'rb'))
+  data = pickle.load(open('models/filename_4.pkl', 'rb'))
   print(data.head())
   #mengubah inputan mejadi dataframe
   df_input = pd.DataFrame({"Longitude": [Longitude], "Latitude": [Latitude]})
@@ -55,11 +55,11 @@ def recommended_hospitals(Longitude, Latitude):
   print(Cluster)
 
   #Menghitung jarak user dengan rumah sakit
-  data_cluster['Hospital Distance'] = data_cluster.apply(lambda x: euclidean_distances([[x.Longitude, x.Latitude]], data_scaled.values), axis = 1)
+  data_cluster['Hospital Distance'] = data_cluster.apply(lambda x: haversine_distances([[x.Longitude, x.Latitude]], data_scaled.values), axis = 1)
 
   #Mengurutkan hasil rekomendasi
-  col = ['Longitude', 'Latitude', 'Tipe', 'BPJS']
-  data_cluster.sort_values(col, ascending = [False]*len(col), inplace = True)
+  col = ['Hospital Distance']
+  data_cluster.sort_values(col, ascending = [True]*len(col), inplace = True)
 
   #Pilih jumlah N rekomendasi
   n = 50
