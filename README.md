@@ -5,8 +5,8 @@ Endpoint: http://surahealth-388810.et.r.appspot.com/
 Introduction
 The Surahealth API provides hospital recommendations based on latitude and longitude coordinates. It uses a machine learning model to predict the class and recommend hospitals based on the user's location.
 
-# Endpoints
-	Hello
+
+# Hello
 	URL: "/"
 	Method: GET
 	Description: Returns a welcome message and instructions on how to access the prediction.
