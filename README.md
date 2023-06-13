@@ -22,7 +22,7 @@ The Surahealth API provides hospital recommendations based on latitude and longi
 
 ### Predict Recommended Hospitals
 
-- **URL:** /v1/predict/<Longitude>/<Latitude>
+- **URL:** /v1/predict/{Longitude}/{Latitude}
 - **Method:** GET
 - **Description:** Predicts the class and recommends hospitals based on the provided longitude and latitude.
 - **Headers:** None
