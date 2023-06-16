@@ -40,31 +40,30 @@ def recommended_hospitals(Longitude, Latitude):
   Predict the class and recommended_hospitals
   """
   #load dataset
-  model = pickle.load(open('models/model_10.pkl', 'rb'))
-  mean = pickle.load(open('models/mean_10.pkl', 'rb'))
-  std = pickle.load(open('models/std_10.pkl', 'rb'))
-  data = pickle.load(open('models/filename_10.pkl', 'rb'))
+  model = pickle.load(open('models/model_9.pkl', 'rb')) 
+  scaler = pickle.load(open('models/sc_9.pkl', 'rb'))
+  data = pickle.load(open('models/filename_9.pkl', 'rb'))
 
   #mengubah inputan mejadi dataframe
   df_input = pd.DataFrame({"Longitude": [Longitude], "Latitude": [Latitude]})
 
   #fiture scaling
-  scaled = pd.DataFrame(tf.divide(tf.subtract(df_input, mean), std))
+  data_scaled = pd.DataFrame(scaler.transform(df_input))
 
   #Prediksi cluster
-  Cluster = model.predict(tf.reshape(scaled, (1, -1)))[0]
+  Cluster = model.predict(tf.reshape(data_scaled, (1, -1)))[0]
   data_cluster = data[data['Cluster']==Cluster].copy()
   print(Cluster)
 
   data_cluster.reset_index(inplace = True, drop = True)
-  inverse = lambda x: np.sum([tf.multiply(scaled, std), mean])
-  tmp = data_cluster.apply(inverse, axis = 1)
+  tmp = data_cluster.apply(lambda x: scaler.inverse_transform(np.array([[x.Longitude, x.Latitude]])), axis = 1)
   tmp_long = [tmp[x][0][0] for x in range(len(tmp))];
   tmp_lat = [tmp[x][0][1] for x in range(len(tmp))];
-  data_cluster.Longitude = np.array(tmp_long); data_cluster.Latitude = np.array(tmp_lat);
+  data_cluster.Longitude = tmp_long; data_cluster.Latitude = tmp_lat;
+  data_cluster['Hospital Distance'] = data_cluster.apply(lambda x: haversine_distances([[x.Longitude, x.Latitude]], df_input.values), axis = 1)
 
   #Mengurutkan hasil rekomendasi
-  col_name = ['Longitude', 'Latitude']
+  col_name = ['Hospital Distance']
   data_cluster.sort_values(col_name, ascending = [True]*len(col_name), inplace = True)
 
   #Pilih jumlah N rekomendasi
